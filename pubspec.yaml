@@ -8,6 +8,10 @@ environment:
 dependencies: 
   cupertino_icons: ^1.0.2
   get: 4.3.6
+
+  firebase_core: ^1.4.0
+  firebase_database: ^7.1.2
+
   flutter: 
     sdk: flutter
 
