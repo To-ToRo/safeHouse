@@ -26,80 +26,9 @@ class HomeView extends GetView<HomeController> {
               child: Row(
                 children: [
                   // 온도 인디케이터
-                  Expanded(
-                      flex: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: BorderDirectional(
-                                end: BorderSide(width: 0.5),
-                                bottom: BorderSide())),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                      padding: const EdgeInsets.only(top: 3.0),
-                                      child: Obx(
-                                        () => Icon(
-                                          Icons.thermostat,
-                                          color: controller.tempColor.value,
-                                        ),
-                                      )),
-                                  Text('Temparature')
-                                ],
-                              ),
-                              Spacer(
-                                flex: 1,
-                              ),
-                              StreamValue(
-                                dbRef: dbRef,
-                                what: 'Temparature',
-                              ),
-                              Spacer(
-                                flex: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
+                  TemparatureIndicator(controller: controller, dbRef: dbRef),
                   // 습도 인디케이터
-                  Expanded(
-                      flex: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            border: BorderDirectional(
-                                start: BorderSide(width: 0.5),
-                                bottom: BorderSide())),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 3.0),
-                                    child: Obx(() => Icon(
-                                          Icons.water_damage,
-                                          color: controller.humiColor.value,
-                                        )),
-                                  ),
-                                  Text(' Humidity')
-                                ],
-                              ),
-                              Spacer(
-                                flex: 1,
-                              ),
-                              StreamValue(
-                                dbRef: dbRef,
-                                what: 'Humidity',
-                              ),
-                              Spacer(
-                                flex: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
+                  HumidityIndicator(controller: controller, dbRef: dbRef)
                 ],
               )),
           Expanded(
@@ -137,49 +66,141 @@ class HomeView extends GetView<HomeController> {
   }
 }
 
-class StreamValue extends StatelessWidget {
-  const StreamValue({
+class TemparatureIndicator extends StatelessWidget {
+  const TemparatureIndicator({
     Key? key,
+    required this.controller,
     required this.dbRef,
-    required this.what,
   }) : super(key: key);
 
+  final HomeController controller;
   final DatabaseReference dbRef;
-  final String what;
-
-  String emoji(String what) {
-    if (what == 'Temparature') {
-      return '\u{2103}';
-    } else if (what == 'Humidity') {
-      return '%';
-    } else {
-      return '%';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final homeController = Get.put(HomeController());
+    return StreamBuilder<Object>(
+        stream: dbRef.onValue,
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData &&
+              !snapshot.hasError &&
+              snapshot.data!.snapshot.value != null) {
+            // print(snapshot.data.snapshot.value);
+            Map data = snapshot.data!.snapshot.value;
 
-    return StreamBuilder(
-      stream: dbRef.onValue,
-      builder: (context, AsyncSnapshot<Event> snap) {
-        if (snap.hasData &&
-            !snap.hasError &&
-            snap.data!.snapshot.value != null) {
-          Map data = snap.data!.snapshot.value;
-          print(data);
+            return Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: BorderDirectional(
+                          end: BorderSide(width: 0.5), bottom: BorderSide())),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3.0),
+                              child: Icon(Icons.thermostat,
+                                  color: data['Temparature'] < 32
+                                      ? Colors.green
+                                      : data['Temparature'] < 41
+                                          ? Colors.yellow
+                                          : data['Temparature'] < 54
+                                              ? Colors.orange
+                                              : Colors.red),
+                            ),
+                            Text('Temparature')
+                          ],
+                        ),
+                        Spacer(
+                          flex: 1,
+                        ),
+                        Center(
+                          child: Text(
+                            '${data['Temparature']} ' + '\u{2103}',
+                            textScaleFactor: 2,
+                          ),
+                        ),
+                        Spacer(
+                          flex: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ));
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
+  }
+}
 
-          return Center(
-            child: Text(
-              '${data[what]} ' + emoji(what),
-              textScaleFactor: 2,
-            ),
-          );
-        } else {
-          return CircularProgressIndicator();
-        }
-      },
-    );
+class HumidityIndicator extends StatelessWidget {
+  const HumidityIndicator({
+    Key? key,
+    required this.controller,
+    required this.dbRef,
+  }) : super(key: key);
+
+  final HomeController controller;
+  final DatabaseReference dbRef;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<Object>(
+        stream: dbRef.onValue,
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData &&
+              !snapshot.hasError &&
+              snapshot.data!.snapshot.value != null) {
+            Map data = snapshot.data!.snapshot.value;
+            print(data);
+            return Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: BorderDirectional(
+                          start: BorderSide(width: 0.5), bottom: BorderSide())),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 3.0),
+                              child: Icon(Icons.water_damage,
+                                  color: data['Humidity'] < 25
+                                      ? Colors.red
+                                      : data['Humidity'] < 30
+                                          ? Colors.orange
+                                          : data['Humidity'] < 60
+                                              ? Colors.green
+                                              : data['Humidity'] < 70
+                                                  ? Colors.orange
+                                                  : Colors.red),
+                            ),
+                            Text('Humidity')
+                          ],
+                        ),
+                        Spacer(
+                          flex: 1,
+                        ),
+                        Center(
+                          child: Text(
+                            '${data['Humidity']} ' + '%',
+                            textScaleFactor: 2,
+                          ),
+                        ),
+                        Spacer(
+                          flex: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ));
+          } else {
+            return CircularProgressIndicator();
+          }
+        });
   }
 }
