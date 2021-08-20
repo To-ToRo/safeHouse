@@ -9,9 +9,10 @@ void main() {
     GetMaterialApp(
       title: "Application",
       theme: ThemeData(
-          appBarTheme: AppBarTheme(
-        color: Colors.black,
-      )),
+        appBarTheme: AppBarTheme(
+          color: Colors.white,
+        ),
+      ),
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     ),
