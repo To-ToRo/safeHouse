@@ -8,11 +8,7 @@ void main() {
   runApp(
     GetMaterialApp(
       title: "Application",
-      theme: ThemeData(
-        appBarTheme: AppBarTheme(
-          color: Colors.white,
-        ),
-      ),
+      theme: ThemeData(),
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     ),
