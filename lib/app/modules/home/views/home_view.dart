@@ -10,53 +10,171 @@ import 'package:firebase_database/firebase_database.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
+  Color screenColor(var temp) {
+    if (temp >= 54) {
+      return Colors.redAccent;
+    } else {
+      return Colors.transparent;
+    }
+  }
+
+  Color powerColor(var power) {
+    Color returnColor = Colors.black;
+
+    if (power) {
+      returnColor = Colors.amber;
+    } else {
+      returnColor = Colors.grey;
+    }
+
+    return returnColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     final dbRef = FirebaseDatabase.instance.reference();
 
-    Color screenColor(var temp) {
-      if (temp >= 54) {
-        return Colors.redAccent;
-      } else {
-        return Colors.transparent;
-      }
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Safe House',
-          style: TextStyle(color: Colors.black),
+        appBar: AppBar(
+          title: Text(
+            'Safe House',
+            style: TextStyle(color: Colors.black),
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-              flex: 1,
-              child: Row(
-                children: [
-                  // 온도 인디케이터
-                  TemparatureIndicator(dbRef: dbRef),
-                  // 습도 인디케이터
-                  HumidityIndicator(dbRef: dbRef)
-                ],
-              )),
-          Expanded(
-              flex: 3,
-              child: Row(
-                children: [
-                  // 미세먼지 인디케이터
-                  DustIndicator(dbRef: dbRef),
-                  // 가스 인디케이터
-                  GasIndicator(dbRef: dbRef),
-                ],
-              )),
-          // 디바이스 버튼
-          Expanded(flex: 4, child: Container()),
-        ],
-      ),
-    );
+        body: StreamBuilder<Object>(
+            stream: dbRef.onValue,
+            builder: (context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData &&
+                  !snapshot.hasError &&
+                  snapshot.data!.snapshot.value != null) {
+                Map data = snapshot.data!.snapshot.value;
+
+                return Column(
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Row(
+                          children: [
+                            // 온도 인디케이터
+                            TemparatureIndicator(dbRef: dbRef),
+                            // 습도 인디케이터
+                            HumidityIndicator(dbRef: dbRef)
+                          ],
+                        )),
+                    Expanded(
+                        flex: 3,
+                        child: Row(
+                          children: [
+                            // 미세먼지 인디케이터
+                            DustIndicator(dbRef: dbRef),
+                            // 가스 인디케이터
+                            GasIndicator(dbRef: dbRef),
+                          ],
+                        )),
+                    // 디바이스 버튼
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('공기청정기'),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(100),
+                                  onTap: () {
+                                    dbRef
+                                        .child('AirPurifier')
+                                        .child('Power')
+                                        .set(!data['AirPurifier']['Power']);
+                                  },
+                                  child: Icon(Icons.power_settings_new,
+                                      size: 80,
+                                      color: powerColor(
+                                          data['AirPurifier']['Power'])),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('에어컨'),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(100),
+                                  onTap: () {
+                                    dbRef
+                                        .child('AirConditioner')
+                                        .child('Power')
+                                        .set(!data['AirConditioner']['Power']);
+                                  },
+                                  child: Icon(Icons.power_settings_new,
+                                      size: 80,
+                                      color: powerColor(
+                                          data['AirConditioner']['Power'])),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ))),
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('난방'),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(100),
+                                  onTap: () {
+                                    dbRef
+                                        .child('Heater')
+                                        .child('Power')
+                                        .set(!data['Heater']['Power']);
+                                  },
+                                  child: Icon(Icons.power_settings_new,
+                                      size: 80,
+                                      color:
+                                          powerColor(data['Heater']['Power'])),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('제습기'),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(100),
+                                  onTap: () {
+                                    dbRef
+                                        .child('Dehumidifier')
+                                        .child('Power')
+                                        .set(!data['Dehumidifier']['Power']);
+                                  },
+                                  child: Icon(Icons.power_settings_new,
+                                      size: 80,
+                                      color: powerColor(
+                                          data['Dehumidifier']['Power'])),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ))),
+                  ],
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }));
   }
 }
 
