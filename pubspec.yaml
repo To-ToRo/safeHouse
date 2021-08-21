@@ -22,4 +22,13 @@ dev_dependencies:
 
 flutter: 
   uses-material-design: true
+  assets:
+    - assets/asset_list.json
+    - assets/images/
+    # - assets/images/dust_blue.png
+    # - assets/images/dust_green.png
+    # - assets/images/dust_orange.png
+    # - assets/images/dust_red.png
+    
+
 

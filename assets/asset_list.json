@@ -1,0 +1,10 @@
+{
+    "images": {
+        "image1": "dust_blue.png",
+        "image2": "dust_green.png",
+        "image3": "dust_orange.png",
+        "image4": "dust_red.png",
+        "image5": "gas_bad.png",
+        "image6": "gas_good.png"
+    }
+}

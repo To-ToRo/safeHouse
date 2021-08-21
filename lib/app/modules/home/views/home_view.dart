@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
 // import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-
-import '../controllers/home_controller.dart';
 
 class HomeView extends StatelessWidget {
   Color screenColor(var emergency) {
@@ -288,7 +284,7 @@ class TemparatureIndicator extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    '${data} ' + '\u{2103}',
+                    data > 255 ? '255 %' : '${data} ' + '\u{2103}',
                     textScaleFactor: 2,
                   ),
                 ),
@@ -357,7 +353,7 @@ class HumidityIndicator extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    '${data} ' + '%',
+                    data > 255 ? '255 %' : '${data} ' + '%',
                     textScaleFactor: 2,
                   ),
                 ),
@@ -375,9 +371,14 @@ class DustIndicator extends StatelessWidget {
   const DustIndicator({Key? key, required this.data}) : super(key: key);
   final Map data;
 
-  Color dustColor(var dust100, var dust25) {
-    Color returnColor = Colors.blue;
-    List dustColorList = [Colors.blue, Colors.green, Colors.orange, Colors.red];
+  Widget dustImage(var dust100, var dust25) {
+    Widget returnImage = Image.asset('assets/images/dust_blue.png');
+    List dustImageList = [
+      Image.asset('assets/images/dust_blue.png'),
+      Image.asset('assets/images/dust_green.png'),
+      Image.asset('assets/images/dust_orange.png'),
+      Image.asset('assets/images/dust_red.png')
+    ];
     int dust100Level = 0;
     int dust25Level = 0;
 
@@ -402,12 +403,12 @@ class DustIndicator extends StatelessWidget {
     }
 
     if (dust100Level > dust25Level) {
-      returnColor = dustColorList[dust100Level];
+      returnImage = dustImageList[dust100Level];
     } else {
-      returnColor = dustColorList[dust25Level];
+      returnImage = dustImageList[dust25Level];
     }
 
-    return returnColor;
+    return returnImage;
   }
 
   @override
@@ -422,12 +423,8 @@ class DustIndicator extends StatelessWidget {
             Text('미세먼지'),
             Spacer(), // 여기 그림 들어가야함
             Expanded(
-              flex: 4,
-              child: Container(
-                decoration: BoxDecoration(
-                    color: dustColor(data['PM100'], data['PM25']),
-                    shape: BoxShape.circle),
-              ),
+              flex: 5,
+              child: dustImage(data['PM100'], data['PM25']),
             ),
             Spacer(),
             Row(
@@ -437,7 +434,7 @@ class DustIndicator extends StatelessWidget {
                   children: [
                     Text('PM1.0'),
                     Text(
-                      data['PM10'].toString(),
+                      data['PM10'] > 255 ? "255" : data['PM10'].toString(),
                       textScaleFactor: 1.5,
                     ),
                   ],
@@ -447,7 +444,7 @@ class DustIndicator extends StatelessWidget {
                   children: [
                     Text('PM2.5'),
                     Text(
-                      data['PM25'].toString(),
+                      data['PM25'] > 255 ? "255" : data['PM25'].toString(),
                       textScaleFactor: 1.5,
                     ),
                   ],
@@ -457,7 +454,7 @@ class DustIndicator extends StatelessWidget {
                   children: [
                     Text('PM10'),
                     Text(
-                      data['PM100'].toString(),
+                      data['PM100'] > 255 ? "255" : data['PM100'].toString(),
                       textScaleFactor: 1.5,
                     ),
                   ],
@@ -476,16 +473,16 @@ class GasIndicator extends StatelessWidget {
   const GasIndicator({Key? key, required this.data}) : super(key: key);
   final data;
 
-  Color gasColor(var gasValue) {
-    Color returnColor = Colors.blue;
+  Widget gasWidget(var gasValue) {
+    Widget returnWidget = Image.asset('assets/images/gas_good.png');
 
-    if (gasValue < 5000) {
-      returnColor = Colors.blue;
+    if (gasValue < 500) {
+      returnWidget = Image.asset('assets/images/gas_good.png');
     } else {
-      returnColor = Colors.red;
+      returnWidget = Image.asset('assets/images/gas_bad.png');
     }
 
-    return returnColor;
+    return returnWidget;
   }
 
   @override
@@ -499,13 +496,7 @@ class GasIndicator extends StatelessWidget {
         children: [
           Text('유해가스'),
           Spacer(),
-          Expanded(
-            flex: 4,
-            child: Container(
-              decoration:
-                  BoxDecoration(color: gasColor(data), shape: BoxShape.circle),
-            ),
-          ),
+          Expanded(flex: 5, child: gasWidget(data)),
           Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
