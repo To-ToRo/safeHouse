@@ -39,8 +39,9 @@ class HomeView extends StatelessWidget {
             Map data = snapshot.data!.snapshot.value;
 
             return Scaffold(
-              backgroundColor: screenColor(
-                  data['Wearable']['Emergency'] || data['Wearable']['Fall']),
+              backgroundColor: screenColor(data['Wearable']['Emergency'] ||
+                  data['Wearable']['Fall'] ||
+                  data['SensorValues']['Motion']),
               appBar: AppBar(
                 title: Text(
                   'Safe House',
@@ -48,8 +49,9 @@ class HomeView extends StatelessWidget {
                 ),
                 centerTitle: true,
                 toolbarHeight: 40,
-                backgroundColor: screenColor(
-                    data['Wearable']['Emergency'] || data['Wearable']['Fall']),
+                backgroundColor: screenColor(data['Wearable']['Emergency'] ||
+                    data['Wearable']['Fall'] ||
+                    data['SensorValues']['Motion']),
               ),
               body: Column(
                 children: [
@@ -58,8 +60,8 @@ class HomeView extends StatelessWidget {
                       child: Row(
                         children: [
                           // 온도 인디케이터
-                          TemparatureIndicator(
-                              data: data['SensorValues']['Temparature']),
+                          TemperatureIndicator(
+                              data: data['SensorValues']['Temperature']),
                           // 습도 인디케이터
                           HumidityIndicator(
                               data: data['SensorValues']['Humidity'])
@@ -233,8 +235,8 @@ class HomeView extends StatelessWidget {
   }
 }
 
-class TemparatureIndicator extends StatelessWidget {
-  const TemparatureIndicator({
+class TemperatureIndicator extends StatelessWidget {
+  const TemperatureIndicator({
     Key? key,
     required this.data,
   }) : super(key: key);
