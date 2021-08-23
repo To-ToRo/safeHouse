@@ -6,9 +6,13 @@ import 'package:get/get.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class HomeView extends StatelessWidget {
-  Color screenColor(var emergency) {
+  Color screenColor(var emergency, var fall, var motion) {
     if (emergency) {
       return Colors.redAccent;
+    } else if (fall) {
+      return Colors.deepOrangeAccent;
+    } else if (motion) {
+      return Colors.yellowAccent;
     } else {
       return Colors.white;
     }
@@ -39,9 +43,8 @@ class HomeView extends StatelessWidget {
             Map data = snapshot.data!.snapshot.value;
 
             return Scaffold(
-              backgroundColor: screenColor(data['Wearable']['Emergency'] ||
-                  data['Wearable']['Fall'] ||
-                  data['SensorValues']['Motion']),
+              backgroundColor: screenColor(data['Wearable']['Emergency'],
+                  data['Wearable']['Fall'], data['SensorValues']['Motion']),
               appBar: AppBar(
                 title: Text(
                   'Safe House',
@@ -49,9 +52,8 @@ class HomeView extends StatelessWidget {
                 ),
                 centerTitle: true,
                 toolbarHeight: 40,
-                backgroundColor: screenColor(data['Wearable']['Emergency'] ||
-                    data['Wearable']['Fall'] ||
-                    data['SensorValues']['Motion']),
+                backgroundColor: screenColor(data['Wearable']['Emergency'],
+                    data['Wearable']['Fall'], data['SensorValues']['Motion']),
               ),
               body: Column(
                 children: [
